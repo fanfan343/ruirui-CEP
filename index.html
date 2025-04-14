@@ -4,12 +4,131 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RuiRui CEP</title>
-    <script>
-        // 开发模式下重定向到Vite开发服务器
-        window.location.href = "http://localhost:8080/";
-    </script>
+    <script src="CSInterface.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #232323;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        h1 {
+            margin-bottom: 30px;
+        }
+        .loading-text {
+            margin-bottom: 30px;
+        }
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .button {
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            width: 200px;
+            text-align: center;
+        }
+        .button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        .info-button {
+            background-color: #1890ff;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+            max-width: 80%;
+            word-break: break-all;
+        }
+        .success {
+            background-color: rgba(40, 167, 69, 0.9);
+        }
+        .error {
+            background-color: rgba(220, 53, 69, 0.9);
+        }
+    </style>
 </head>
 <body>
-    <h1>正在加载CEP面板...</h1>
+    <h1>RuiRui CEP</h1>
+    <p class="loading-text">正在加载CEP面板...</p>
+    
+    <div class="button-group">
+        <!-- 获取合成信息按钮 -->
+        <button id="getCompInfoBtn" class="button info-button">获取合成信息</button>
+    </div>
+    
+    <div id="result" class="result"></div>
+    
+    <script>
+        // 添加获取合成信息按钮功能
+        document.getElementById('getCompInfoBtn').addEventListener('click', function() {
+            try {
+                // 检查CEP环境
+                if (!window.__adobe_cep__) {
+                    throw new Error("不在Adobe CEP环境中运行");
+                }
+                
+                // 初始化CSInterface
+                const csInterface = new CSInterface();
+                
+                // 调用ExtendScript函数获取合成信息
+                csInterface.evalScript('getCompInfo()', function(response) {
+                    const resultElem = document.getElementById('result');
+                    resultElem.style.display = 'block';
+                    
+                    if (response && (response.includes('错误') || response.includes('没有活动合成'))) {
+                        resultElem.textContent = response;
+                        resultElem.className = 'result error';
+                    } else {
+                        // 打印到控制台
+                        console.log("获取到的合成信息:");
+                        console.log(response);
+                        
+                        // 尝试解析并美化输出
+                        try {
+                            const compData = JSON.parse(response);
+                            console.log("解析后的合成数据:", compData);
+                            resultElem.textContent = "成功获取合成信息，请查看控制台输出";
+                        } catch(e) {
+                            resultElem.textContent = "获取成功，但JSON格式无效：" + response.substring(0, 100) + "...";
+                        }
+                        
+                        resultElem.className = 'result success';
+                        
+                        // 10秒后隐藏结果，给用户更多时间查看
+                        setTimeout(function() {
+                            resultElem.style.display = 'none';
+                        }, 10000);
+                    }
+                });
+            } catch (err) {
+                const resultElem = document.getElementById('result');
+                resultElem.textContent = "获取合成信息失败: " + err.message;
+                resultElem.className = 'result error';
+                resultElem.style.display = 'block';
+            }
+        });
+        
+        // 开发模式下重定向到Vite开发服务器
+        setTimeout(function() {
+            window.location.href = "http://localhost:8080/";
+        }, 1000);
+    </script>
 </body>
 </html>
