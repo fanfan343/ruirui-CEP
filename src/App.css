@@ -7,10 +7,260 @@
   box-sizing: border-box;
   border: 0.2px solid rgba(244, 231, 223, 0.75);
   border-radius: 3px;
+  display: flex;
+  flex-direction: column;
 }
 
 .card {
   padding: 2em;
+}
+
+/* 聊天界面样式 */
+.chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  overflow: hidden;
+  position: relative;
+  height: 100%; /* 确保容器占满可用高度 */
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto !important; /* 强制使用滚动条 */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 10px;
+  padding-bottom: 150px; /* 减少底部内边距，因为没有外框后整体高度变小 */
+  height: 100%; /* 确保容器占满可用高度 */
+  
+  /* 自定义滚动条样式 */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(100, 108, 255, 0.4) rgba(42, 42, 42, 0.2); /* Firefox */
+}
+
+/* Webkit浏览器的自定义滚动条 */
+.chat-messages::-webkit-scrollbar {
+  width: 3px; /* 增加滚动条宽度 */
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: rgba(42, 42, 42, 0.5); /* 增加轨道背景不透明度 */
+  border-radius: 4px;
+  margin: 5px 0; /* 上下边距 */
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: rgba(100, 108, 255, 0.6); /* 增加滑块不透明度 */
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 108, 255, 0.8); /* 悬停时颜色更深 */
+}
+
+.message {
+  display: flex;
+  max-width: 85%;
+}
+
+.user-message {
+  align-self: flex-end;
+}
+
+.bot-message {
+  align-self: flex-start;
+}
+
+.message-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin: 0 8px 0 0;
+  object-fit: cover;
+}
+
+.avatar-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  50% { transform: rotate(0deg); }
+  75% { transform: rotate(5deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.message-content {
+  background: #2a2a2a;
+  padding: 10px 15px;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.user-message .message-content {
+  background: #3a3a3a;
+}
+
+/* 思维链样式 */
+.thinking-message {
+  margin-bottom: 5px;
+}
+
+.thinking-content {
+  background: #1d1d1d;
+  border-left: 3px solid #646cff;
+  font-size: 0.85rem;
+  color: #b0b0b0;
+  font-family: monospace;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  padding: 10px 15px 10px 12px;
+  
+  /* 自定义水平滚动条样式 */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(100, 108, 255, 0.4) rgba(29, 29, 29, 0.8); /* Firefox */
+}
+
+/* Webkit浏览器的自定义水平滚动条 */
+.thinking-content::-webkit-scrollbar {
+  height: 4px; /* 水平滚动条高度 */
+}
+
+.thinking-content::-webkit-scrollbar-track {
+  background: rgba(29, 29, 29, 0.8); /* 滚动条轨道背景 */
+  border-radius: 2px;
+}
+
+.thinking-content::-webkit-scrollbar-thumb {
+  background: rgba(100, 108, 255, 0.4); /* 滚动条滑块背景 */
+  border-radius: 2px;
+  transition: background 0.3s ease;
+}
+
+.thinking-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 108, 255, 0.7); /* 悬停时颜色更深 */
+}
+
+/* 底部控制区域相关样式移到ChatTabs.css中，这里可以删除 */
+.bottom-controls {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* 以下样式已移至ChatTabs.css，在这里删除以避免冲突 */
+.chat-input-container {
+  /* 空样式，避免使用display:none */
+}
+
+.chat-input {
+  /* 空样式，避免使用display:none */
+}
+
+.chat-input:focus {
+  /* 空样式，避免使用display:none */
+}
+
+.send-button {
+  /* 空样式，避免使用display:none */
+}
+
+.send-button:hover {
+  /* 空样式，避免使用display:none */
+}
+
+/* 设置面板样式 */
+.settings-panel {
+  position: absolute;
+  bottom: 35px;
+  right: 15px;
+  width: 250px;
+  background: #2a2a2a;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  padding: 15px;
+  z-index: 100;
+}
+
+.settings-panel h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1rem;
+  color: #fff;
+  text-align: center;
+}
+
+.settings-group {
+  margin-bottom: 15px;
+}
+
+.settings-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.8rem;
+  color: #ccc;
+}
+
+.settings-input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #444;
+  background: #333;
+  color: #fff;
+  font-size: 0.8rem;
+  box-sizing: border-box;
+}
+
+.settings-input:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+.settings-select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #444;
+  background: #333;
+  color: #fff;
+  font-size: 0.8rem;
+  box-sizing: border-box;
+}
+
+.save-settings {
+  width: 100%;
+  padding: 8px;
+  background: #646cff;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
+.save-settings:hover {
+  background: #535bf2;
+}
+
+/* 图标样式保留在App.css中，因为它可能在多处使用 */
+.icon {
+  width: 10px;
+  height: 10px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.icon:hover {
+  transform: scale(1.2);
 }
 
 button {

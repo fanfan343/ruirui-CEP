@@ -1,0 +1,333 @@
+/* 标签页容器样式 */
+.chat-tabs-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 标签头部样式 */
+.tabs-header {
+  display: flex;
+  align-items: center;
+  padding: 6px 15px;
+  background-color: #2a2a2a;
+  border-bottom: 1px solid rgba(244, 231, 223, 0.15);
+}
+
+/* 标签列表样式 */
+.tabs-list {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 108, 255, 0.4) rgba(42, 42, 42, 0.2);
+}
+
+.tabs-list::-webkit-scrollbar {
+  height: 3px;
+}
+
+.tabs-list::-webkit-scrollbar-track {
+  background: rgba(42, 42, 42, 0.2);
+  border-radius: 2px;
+}
+
+.tabs-list::-webkit-scrollbar-thumb {
+  background: rgba(100, 108, 255, 0.4);
+  border-radius: 2px;
+  transition: background 0.3s ease;
+}
+
+.tabs-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 108, 255, 0.7);
+}
+
+/* 单个标签样式 */
+.tab {
+  display: flex;
+  align-items: center;
+  padding: 4px 10px;
+  margin-right: 10px;
+  background-color: #323232;
+  border-radius: 5px;
+  min-width: 120px;
+  max-width: 200px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tab:hover {
+  background-color: #444444;
+}
+
+.tab.active {
+  background-color: #444444;
+  border-bottom: 2px solid rgba(100, 108, 255, 0.8);
+}
+
+/* 标签标题样式 */
+.tab-title {
+  flex: 1;
+  color: #ffffff;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 关闭标签按钮样式 */
+.close-tab-btn {
+  background: none;
+  border: none;
+  color: #aaaaaa;
+  font-size: 14px;
+  padding: 0 0 0 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+.close-tab-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* 添加标签按钮样式 */
+.add-tab-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  margin-left: 10px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.add-tab-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.add-tab-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* 标签内容区域样式 */
+.tabs-content {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 40px);
+}
+
+/* 底部区域的统一容器 */
+.bottom-area {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #232323; /* 保持与App背景一致的颜色 */
+  padding: 10px 15px 25px;
+  z-index: 10;
+  display: flex !important;
+  flex-direction: column;
+  border-top: none; /* 移除顶部边框 */
+  box-shadow: none; /* 移除阴影效果 */
+}
+
+/* 输入框容器样式 */
+.bottom-area .bottom-controls {
+  margin-bottom: 15px;
+  width: 100%;
+  display: block !important;
+}
+
+/* 图标组样式 */
+.bottom-area .icon-group {
+  position: relative;
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.bottom-area .left-icons {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+
+.bottom-area .right-icons {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+/* 移除旧的图标组样式 */
+.chat-tabs-container .icon-group {
+  position: absolute;
+  bottom: 15px;
+  display: flex;
+  gap: 10px;
+  z-index: 11;
+}
+
+.chat-tabs-container .left-icons {
+  left: 15px;
+}
+
+.chat-tabs-container .right-icons {
+  right: 15px;
+}
+
+/* 聊天输入框容器 */
+.chat-input-container {
+  display: flex !important; /* 强制显示 */
+  padding: 15px;
+  background-color: transparent;
+  z-index: 5;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* 聊天输入框 */
+.chat-input {
+  flex: 1;
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: none;
+  background: #2a2a2a;
+  color: #fff;
+  font-size: 0.9rem;
+  resize: none;
+  min-height: 20px;
+  max-height: 120px;
+  display: block !important; /* 强制显示 */
+}
+
+.chat-input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* 输入框滚动条样式 */
+.chat-input::-webkit-scrollbar {
+  width: 3px;
+}
+
+.chat-input::-webkit-scrollbar-track {
+  background: rgba(42, 42, 42, 0.2);
+  border-radius: 2px;
+}
+
+.chat-input::-webkit-scrollbar-thumb {
+  background: rgba(100, 108, 255, 0.4);
+  border-radius: 2px;
+  transition: background 0.3s ease;
+}
+
+.chat-input::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 108, 255, 0.7);
+}
+
+/* 发送按钮 */
+.send-button {
+  margin-left: 10px;
+  padding: 0;
+  width: 44px;
+  min-width: 44px;
+  background: #3a3a3a;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  height: 44px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 发送图标样式 */
+.send-icon {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s;
+  stroke: white; /* 添加白色笔画颜色 */
+  fill: none; /* 确保无填充 */
+  display: block; /* 确保显示 */
+}
+
+.send-button:hover .send-icon {
+  transform: scale(1.1);
+}
+
+.send-button:hover {
+  background: #4a4a4a;
+}
+
+.send-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 加载动画 */
+.loading-dots {
+  display: inline-block;
+  position: relative;
+  width: 20px;
+  text-align: center;
+  animation: loadingPulse 1.4s infinite ease-in-out;
+}
+
+@keyframes loadingPulse {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* 图标相关样式 */
+.icon-group {
+  display: flex;
+  gap: 10px;
+  padding: 0 10px;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.icon:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* API配置成功的图标样式 */
+.icon-success {
+  filter: brightness(0) saturate(100%) invert(71%) sepia(80%) saturate(471%) hue-rotate(84deg) brightness(95%) contrast(88%);
+  opacity: 1;
+} 
