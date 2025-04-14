@@ -32,7 +32,7 @@
   display: flex;
   flex-direction: column;
   gap: 15px;
-  padding: 10px;
+  padding: 10px 15px; /* 修改左右内边距 */
   padding-bottom: 150px; /* 减少底部内边距，因为没有外框后整体高度变小 */
   height: 100%; /* 确保容器占满可用高度 */
   
@@ -65,10 +65,20 @@
 .message {
   display: flex;
   max-width: 85%;
+  margin-bottom: 8px; /* 减小消息间距 */
 }
 
 .user-message {
   align-self: flex-end;
+  margin-right: 0; /* 移除右侧边距，更接近右侧 */
+}
+
+.user-message .message-content {
+  background: #3a3a3a;
+  margin-left: auto; /* 确保内容靠右对齐 */
+  word-break: break-word; /* 防止长文本导致奇怪的换行 */
+  white-space: pre-wrap; /* 保留用户输入的换行，但允许自动换行 */
+  text-align: left; /* 确保用户消息也是左对齐 */
 }
 
 .bot-message {
@@ -76,8 +86,8 @@
 }
 
 .message-avatar {
-  width: 30px;
-  height: 30px;
+  width: 23px; /* 原30px的3/4 */
+  height: 23px; /* 原30px的3/4 */
   border-radius: 50%;
   margin: 0 8px 0 0;
   object-fit: cover;
@@ -96,33 +106,38 @@
 }
 
 .message-content {
-  background: #2a2a2a;
-  padding: 10px 15px;
-  border-radius: 12px;
-  color: #fff;
-  font-size: 0.9rem;
-  line-height: 1.4;
+  background-color: #1f1f22;
+  padding: 8px 16px;
+  border-radius: 8px;
+  color: #e5e5ea;
+  font-size: 0.6rem; /* 缩小1/3 */
+  line-height: 1.5;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  width: auto; /* 让宽度自适应内容 */
+  max-width: 100%; /* 最大宽度为父容器宽度 */
+  text-align: left; /* 确保所有消息左对齐 */
+  border: none; /* 确保没有边框 */
 }
 
-.user-message .message-content {
-  background: #3a3a3a;
-}
-
-/* 思维链样式 */
-.thinking-message {
-  margin-bottom: 5px;
-}
-
+/* 思维链相关样式 */
 .thinking-content {
-  background: #1d1d1d;
-  border-left: 3px solid #646cff;
-  font-size: 0.85rem;
+  background-color: transparent !important; /* 移除背景色 */
+  border-left: 0.1px solid rgba(244, 231, 223, 0.5625) !important; /* 与外围出血框一致，但再细一半，不透明度降低25% */
+  border-top: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  font-size: 0.57rem; /* 缩小1/3 */
   color: #b0b0b0;
-  font-family: monospace;
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, "SF Pro Text", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-weight: 300; /* 细体 */
   white-space: pre-wrap;
   overflow-x: auto;
-  padding: 10px 15px 10px 12px;
-  
+  padding: 0 15px 0 12px; /* 移除上下内边距 */
+  border-radius: 0 !important; /* 移除圆角 */
+  box-shadow: none !important; /* 移除阴影 */
+  outline: none !important; /* 移除轮廓 */
   /* 自定义水平滚动条样式 */
   scrollbar-width: thin; /* Firefox */
   scrollbar-color: rgba(100, 108, 255, 0.4) rgba(29, 29, 29, 0.8); /* Firefox */
@@ -146,6 +161,66 @@
 
 .thinking-content::-webkit-scrollbar-thumb:hover {
   background: rgba(100, 108, 255, 0.7); /* 悬停时颜色更深 */
+}
+
+/* 思考收起/展开功能样式 */
+.thinking-wrapper {
+  width: 100%;
+}
+
+.thinking-header, .collapsed-thinking {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 4px 0;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(244, 231, 223, 0.2);
+  color: #aaa;
+  font-size: 0.75rem;
+  user-select: none;
+}
+
+.collapsed-thinking {
+  padding: 4px 0;
+  margin-bottom: 0;
+  position: relative;
+}
+
+.collapsed-thinking::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background-color: rgba(100, 108, 255, 0.6);
+  border-radius: 50%;
+  margin-right: 6px;
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.thinking-toggle-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+  transition: opacity 0.2s, transform 0.2s;
+  filter: invert(70%);
+}
+
+.thinking-header:hover .thinking-toggle-icon,
+.collapsed-thinking:hover .thinking-toggle-icon {
+  opacity: 1;
+}
+
+.thinking-header:hover,
+.collapsed-thinking:hover {
+  color: #ddd;
+}
+
+.thinking-text {
+  padding-top: 4px;
 }
 
 /* 底部控制区域相关样式移到ChatTabs.css中，这里可以删除 */

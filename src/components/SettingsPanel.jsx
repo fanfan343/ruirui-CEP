@@ -48,7 +48,7 @@ const SettingsPanel = ({ isVisible, onClose }) => {
   
   return (
     <div className="settings-panel" ref={panelRef}>
-      <h3>设置</h3>
+      <h3>ruirui的声带</h3>
       
       <div className="settings-group">
         <label htmlFor="apiKey">DeepSeek API Key</label>
@@ -84,9 +84,6 @@ const SettingsPanel = ({ isVisible, onClose }) => {
         >
           <option value="deepseek-chat">DeepSeek-V3 (deepseek-chat)</option>
           <option value="deepseek-reasoner">DeepSeek-R1 (deepseek-reasoner)</option>
-          <option value="deepseek-llm-67b-chat">DeepSeek-LLM-67B-Chat (旧版)</option>
-          <option value="deepseek-coder-33b-instruct">DeepSeek-Coder-33B-Instruct</option>
-          <option value="deepseek-llm-7b-chat">DeepSeek-LLM-7B-Chat</option>
         </select>
       </div>
       

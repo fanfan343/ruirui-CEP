@@ -70,7 +70,6 @@
 
 .tab.active {
   background-color: #444444;
-  border-bottom: 2px solid rgba(100, 108, 255, 0.8);
 }
 
 /* 标签标题样式 */
@@ -96,11 +95,13 @@
   justify-content: center;
   width: 16px;
   height: 16px;
-  border-radius: 50%;
+  border-radius: 0;
+  line-height: 1;
+  margin-top: -1px;
 }
 
 .close-tab-btn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: transparent;
   color: #ffffff;
 }
 
@@ -330,4 +331,96 @@
 .icon-success {
   filter: brightness(0) saturate(100%) invert(71%) sepia(80%) saturate(471%) hue-rotate(84deg) brightness(95%) contrast(88%);
   opacity: 1;
+}
+
+/* 用户消息样式 */
+.user-message {
+  align-self: flex-end;
+  margin-right: 0; /* 移除右侧边距，更接近右侧 */
+  max-width: 85%;
+}
+
+.user-message .message-content {
+  background: #3a3a3a;
+  margin-left: auto; /* 确保内容靠右对齐 */
+  word-break: break-word; /* 防止长文本导致奇怪的换行 */
+  white-space: pre-wrap; /* 保留用户输入的换行，但允许自动换行 */
+  border-radius: 12px 12px 2px 12px; /* 右下角更尖锐 */
+  text-align: left; /* 确保文本左对齐 */
+}
+
+/* 机器人消息样式 */
+.bot-message {
+  align-self: flex-start;
+  max-width: 85%;
+}
+
+.bot-message .message-content {
+  border-radius: 12px 12px 12px 2px; /* 左下角更尖锐 */
+  background-color: #1f1f22; /* 统一背景色 */
+  border: none; /* 确保没有边框 */
+}
+
+/* 消息样式 */
+.message {
+  display: flex;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.message-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+/* 添加占位样式，确保即使没有头像也能对齐 */
+.message-avatar-placeholder {
+  width: 30px;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.message-content {
+  background: #2a2a2a;
+  padding: 10px 15px;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 0.6rem; /* 缩小1/3 */
+  line-height: 1.4;
+  flex-grow: 0; /* 改为0，不要自动扩展 */
+  width: auto; /* 宽度根据内容自适应 */
+  max-width: 100%; /* 最大宽度 */
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+/* 思维链样式 */
+.thinking-message {
+  margin-bottom: 5px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.thinking-content {
+  background-color: transparent; /* 移除背景色 */
+  border-left: 0.1px solid rgba(244, 231, 223, 0.5625); /* 与外围出血框一致，但再细一半，不透明度降低25% */
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  font-size: 0.57rem; /* 缩小1/3 */
+  color: #b0b0b0;
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, "SF Pro Text", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-weight: 300; /* 细体 */
+  white-space: pre-wrap;
+  overflow-x: auto;
+  padding: 0 15px 0 12px; /* 移除上下内边距 */
+  border-radius: 0; /* 移除圆角 */
+  box-shadow: none; /* 移除阴影 */
+  
+  /* 自定义水平滚动条样式 */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(100, 108, 255, 0.4) rgba(29, 29, 29, 0.8); /* Firefox */
 } 
