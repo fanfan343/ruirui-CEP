@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo, useCallback } from 'react';
 import ChatInterface from './ChatInterface';
 import { v4 as uuidv4 } from 'uuid';
 import addIcon from '/icons/Add_Plus_Circle.svg';
@@ -9,6 +9,181 @@ import terminalIcon from '/icons/Window_Terminal.svg';
 import sendIcon from '/icons/Send.svg';
 import '../styles/ChatTabs.css';
 
+// 导入从GetCompInfoButton组件提取的函数
+const parseSerializedData = (jsonString) => {
+  try {
+    // 添加调试信息，检查输入的字符串
+    console.log("原始返回字符串:", jsonString);
+    console.log("字符串长度:", jsonString ? jsonString.length : 0);
+    console.log("字符串类型:", typeof jsonString);
+    
+    // 检查字符串是否为空或无效
+    if (!jsonString || typeof jsonString !== 'string' || jsonString.trim() === '') {
+      console.error("返回的数据为空或无效");
+      return null;
+    }
+    
+    // 尝试解析前检查JSON格式
+    try {
+      // 用正则表达式检查JSON基本格式
+      if (!/^\s*[\{\[]/.test(jsonString) || !/[\}\]]\s*$/.test(jsonString)) {
+        console.warn("JSON格式可能有问题，不是以{或[开始，或不是以}或]结束");
+      }
+      
+      // 打印前20个和后20个字符，帮助调试
+      console.log("JSON开头:", jsonString.substring(0, 20));
+      console.log("JSON结尾:", jsonString.substring(jsonString.length - 20));
+    } catch (e) {
+      console.error("检查JSON格式时出错:", e);
+    }
+    
+    const data = JSON.parse(jsonString);
+    console.log("JSON解析成功，解析后的数据:", data);
+    
+    // 递归处理特殊类型标记
+    const reviveSpecialTypes = (obj) => {
+      if (!obj || typeof obj !== 'object') return obj;
+      
+      // 处理循环引用
+      if (obj.__type === 'CircularReference') {
+        return '【循环引用】→ ' + obj.path;
+      }
+      
+      // 处理特殊值
+      if (obj.__type === 'special') {
+        if (obj.value === 'undefined') return '【undefined】';
+        if (obj.value === 'NaN') return '【NaN】';
+        if (obj.value === 'Infinity') return '【Infinity】';
+        if (obj.value === '-Infinity') return '【-Infinity】';
+        return obj.value;
+      }
+      
+      // 处理日期
+      if (obj.__type === 'Date') {
+        return new Date(obj.value);
+      }
+      
+      // 处理数组
+      if (Array.isArray(obj)) {
+        return obj.map(item => reviveSpecialTypes(item));
+      }
+      
+      // 处理对象
+      const result = {};
+      for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+          result[key] = reviveSpecialTypes(obj[key]);
+        }
+      }
+      return result;
+    };
+    
+    return reviveSpecialTypes(data);
+  } catch (e) {
+    console.error("解析序列化数据失败:", e);
+    return null;
+  }
+};
+
+// Layer按钮组件，使用memo优化渲染
+const LayerButton = memo(({ layerLine, layerType, isDisabled, onClick }) => (
+  <button 
+    className={`layer-button ${isDisabled ? 'disabled' : ''}`}
+    data-layer-type={layerType}
+    onClick={onClick}
+    tabIndex="-1"
+  >
+    {layerLine}
+  </button>
+));
+
+// 合成信息显示容器组件
+const CompInfoContainer = memo(({ compInfo, onRefresh, onClose, onLayerClick }) => {
+  // 计算图层数量
+  const layerCount = compInfo.simple.includes('图层列表 (共') ? 
+    compInfo.simple.split('图层列表 (共')[1].split('个')[0].trim() : '0';
+
+  // 解析图层列表
+  const layers = compInfo.simple.includes('图层列表') ? 
+    compInfo.simple
+      .split('\n\n')[1]
+      .split('\n')
+      .slice(1) // 跳过标题行
+      .filter(line => line.trim() !== '') : [];
+
+  return (
+    <div className="comp-info-container">
+      <div className="comp-info-header">
+        <span>
+          当前合成：{layerCount}个图层
+        </span>
+        <div className="header-actions">
+          <button 
+            className="comp-info-refresh-btn"
+            onClick={onRefresh}
+            title="刷新图层列表"
+            tabIndex="-1"
+          >
+            ↻
+          </button>
+          <button 
+            className="comp-info-close-btn"
+            onClick={onClose}
+            tabIndex="-1"
+          >
+            ×
+          </button>
+        </div>
+      </div>
+      <div className="comp-info-content">
+        {/* 直接显示图层列表按钮 */}
+        <div className="layers-list-buttons">
+          {layers.map((layerLine, index) => {
+            // 解析图层信息
+            const layerTypeMatch = layerLine.match(/\[(.*?)\]/);
+            const layerType = layerTypeMatch ? layerTypeMatch[1] : '';
+            const isDisabled = layerLine.includes('(已禁用)');
+            
+            return (
+              <LayerButton 
+                key={index} 
+                layerLine={layerLine}
+                layerType={layerType}
+                isDisabled={isDisabled}
+                onClick={() => onLayerClick(layerLine)}
+              />
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+});
+
+// 错误信息窗口组件
+const ErrorInfoContainer = memo(({ error, onClose }) => (
+  <div className="comp-info-error">
+    <div className="comp-info-header">
+      <span>获取合成信息出错</span>
+      <button 
+        className="comp-info-close-btn"
+        onClick={onClose}
+        tabIndex="-1"
+      >
+        ×
+      </button>
+    </div>
+    <div>{error}</div>
+  </div>
+));
+
+// 加载中窗口组件
+const LoadingInfoContainer = memo(() => (
+  <div className="comp-info-loading">
+    <span>正在获取合成信息...</span>
+  </div>
+));
+
 const ChatTabs = ({ toggleSettings, apiConfigured, setApiConfigured }) => {
   const [tabs, setTabs] = useState([
     { id: uuidv4(), title: '新对话', messages: [] }
@@ -17,6 +192,11 @@ const ChatTabs = ({ toggleSettings, apiConfigured, setApiConfigured }) => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef(null);
+  
+  // 添加合成信息状态
+  const [compInfo, setCompInfo] = useState(null);
+  const [compInfoError, setCompInfoError] = useState(null);
+  const [compInfoLoading, setCompInfoLoading] = useState(false);
   
   // 从本地存储加载会话
   useEffect(() => {
@@ -87,6 +267,101 @@ const ChatTabs = ({ toggleSettings, apiConfigured, setApiConfigured }) => {
     }
   };
   
+  // 获取合成信息的简化版函数
+  const getCompInfo = () => {
+    // 避免重复加载，如果已经在加载中，则不再触发
+    if (compInfoLoading) return;
+    
+    setCompInfoLoading(true);
+    setCompInfoError(null);
+    
+    console.log("开始获取合成信息...");
+
+    // 检查CSInterface是否加载
+    if (!window.CSInterface) {
+      setCompInfoLoading(false);
+      setCompInfoError("CSInterface未加载，无法与After Effects通信");
+      console.error("CSInterface未加载");
+      return;
+    }
+
+    try {
+      // 检查CEP环境
+      if (!window.__adobe_cep__) {
+        throw new Error("不在Adobe CEP环境中运行");
+      }
+
+      // 初始化CSInterface
+      const csInterface = new window.CSInterface();
+      
+      // 使用简化版函数获取合成信息
+      const jsCode = `
+        try {
+          if (!app.project.activeItem || !(app.project.activeItem instanceof CompItem)) {
+            '没有活动合成';
+          } else {
+            var comp = app.project.activeItem;
+            var result = '合成: ' + comp.name + ', 尺寸: ' + comp.width + 'x' + comp.height + ', 时长: ' + comp.duration + '秒\\n\\n';
+            
+            // 获取图层列表
+            result += '图层列表 (共' + comp.numLayers + '个):\\n';
+            
+            for (var i = 1; i <= comp.numLayers; i++) {
+              try {
+                var layer = comp.layer(i);
+                var layerType = '';
+                
+                // 确定图层类型
+                if (layer instanceof TextLayer) layerType = "文本";
+                else if (layer instanceof ShapeLayer) layerType = "形状";
+                else if (layer instanceof CameraLayer) layerType = "摄像机";
+                else if (layer instanceof LightLayer) layerType = "灯光";
+                else if (layer.source instanceof CompItem) layerType = "预合成";
+                else if (layer.nullLayer) layerType = "空对象";
+                else if (layer.adjustmentLayer) layerType = "调整层";
+                else layerType = "素材";
+                
+                // 添加到结果
+                result += i + '. ' + layer.name + ' [' + layerType + ']';
+                result += layer.enabled ? '' : ' (已禁用)';
+                result += '\\n';
+              } catch(layerErr) {
+                result += i + '. [读取错误]\\n';
+              }
+            }
+            
+            result;
+          }
+        } catch(e) {
+          '错误: ' + e.toString();
+        }
+      `;
+      
+      csInterface.evalScript(jsCode, (response) => {
+        if (!response) {
+          console.error("简化版函数无响应");
+          setCompInfoError("无响应，CEP连接可能有问题");
+          setCompInfoLoading(false);
+          return;
+        }
+        
+        console.log("简化版函数返回:", response);
+        if (response.includes('错误') || response.includes('没有活动合成')) {
+          setCompInfoError(response);
+          setCompInfoLoading(false);
+        } else {
+          // 一次性更新状态，减少渲染次数
+          setCompInfo({simple: response});
+          setCompInfoLoading(false);
+        }
+      });
+    } catch (err) {
+      console.error("获取合成信息出错:", err);
+      setCompInfoError("执行失败: " + err.message);
+      setCompInfoLoading(false);
+    }
+  };
+  
   // 更新标签标题（基于第一条用户消息）
   const updateTabTitle = (tabId, messages) => {
     if (messages.length > 0) {
@@ -121,6 +396,41 @@ const ChatTabs = ({ toggleSettings, apiConfigured, setApiConfigured }) => {
       updateTabTitle(tabId, newMessages);
     }
   };
+  
+  // 添加@按钮点击事件处理函数
+  const handleMentionClick = useCallback(() => {
+    getCompInfo();
+  }, []);
+  
+  // 关闭合成信息窗口
+  const handleCloseCompInfo = useCallback(() => {
+    setCompInfo(null);
+  }, []);
+  
+  // 关闭错误信息
+  const handleCloseErrorInfo = useCallback(() => {
+    setCompInfoError(null);
+  }, []);
+  
+  // 处理点击外部关闭合成信息窗口
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      // 如果有合成信息窗口 且 点击不在窗口内 且 不是点击的@按钮
+      if (compInfo && 
+          event.target.closest('.comp-info-container') === null && 
+          !event.target.closest('.mention-button')) {
+        setCompInfo(null);
+      }
+    };
+    
+    // 添加全局点击监听
+    document.addEventListener('mousedown', handleOutsideClick);
+    
+    // 组件卸载时移除监听
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [compInfo]);
   
   // 处理发送消息
   const handleSend = async () => {
@@ -450,6 +760,11 @@ const ChatTabs = ({ toggleSettings, apiConfigured, setApiConfigured }) => {
     }
   }, [activeTabId]);
   
+  // 添加图层点击处理函数
+  const handleLayerClick = useCallback((layerLine) => {
+    console.log(`选择了图层: ${layerLine}`);
+  }, []);
+  
   return (
     <div className="chat-tabs-container">
       <div className="tabs-header">
@@ -464,6 +779,7 @@ const ChatTabs = ({ toggleSettings, apiConfigured, setApiConfigured }) => {
               <button 
                 className="close-tab-btn"
                 onClick={(e) => closeTab(tab.id, e)}
+                tabIndex="-1"
               >
                 ×
               </button>
@@ -476,6 +792,27 @@ const ChatTabs = ({ toggleSettings, apiConfigured, setApiConfigured }) => {
       </div>
       
       <div className="tabs-content">
+        {/* 合成信息显示 */}
+        {compInfo && (
+          <CompInfoContainer 
+            compInfo={compInfo}
+            onRefresh={handleMentionClick}
+            onClose={handleCloseCompInfo}
+            onLayerClick={handleLayerClick}
+          />
+        )}
+        
+        {compInfoLoading && (
+          <LoadingInfoContainer />
+        )}
+        
+        {compInfoError && (
+          <ErrorInfoContainer 
+            error={compInfoError}
+            onClose={handleCloseErrorInfo}
+          />
+        )}
+        
         {tabs.map(tab => (
           <ChatInterface
             key={tab.id}
@@ -498,27 +835,42 @@ const ChatTabs = ({ toggleSettings, apiConfigured, setApiConfigured }) => {
         {/* 输入框部分 */}
         <div className="bottom-controls">
           <div className="chat-input-container">
-            <textarea
-              ref={inputRef}
-              className="chat-input"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="要和ruirui聊什么..."
-              rows={1}
-              disabled={isLoading}
-            />
-            <button 
-              className="send-button" 
-              onClick={handleSend}
-              disabled={isLoading || input.trim() === ''}
-              title="发送"
-            >
-              {isLoading ? 
-                <span className="loading-dots">...</span> : 
-                <img src={sendIcon} alt="发送" className="send-icon" />
-              }
-            </button>
+            {/* 输入框包装div，包含@图标和输入框和发送按钮 */}
+            <div className="input-wrapper">
+              {/* 添加@图标按钮 */}
+              <button 
+                className="input-action-button mention-button" 
+                title="提及用户或插入变量"
+                onClick={handleMentionClick}
+                tabIndex="-1"
+              >
+                <span className="at-icon">@</span>
+              </button>
+              
+              <textarea
+                ref={inputRef}
+                className="chat-input"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="要和ruirui聊什么..."
+                rows={1}
+                disabled={isLoading}
+              />
+              
+              {/* 发送按钮 */}
+              <button 
+                className="input-action-button send-button" 
+                onClick={handleSend}
+                disabled={isLoading || input.trim() === ''}
+                title="发送"
+              >
+                {isLoading ? 
+                  <span className="loading-dots">...</span> : 
+                  <img src={sendIcon} alt="发送" className="send-icon" />
+                }
+              </button>
+            </div>
           </div>
         </div>
         

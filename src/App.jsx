@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import './App.css'
 import ChatTabs from './components/ChatTabs'
 import SettingsPanel from './components/SettingsPanel'
-import GetCompInfoButton from './components/GetCompInfoButton'
 
 function App() {
   const [showSettings, setShowSettings] = useState(false);
@@ -10,7 +9,7 @@ function App() {
   
   // 添加调试日志
   useEffect(() => {
-    console.log("App组件已加载，GetCompInfoButton已导入");
+    console.log("App组件已加载");
   }, []);
   
   const toggleSettings = () => {
@@ -47,12 +46,6 @@ function App() {
         isVisible={showSettings} 
         onClose={() => setShowSettings(false)} 
       />
-      
-      {/* 功能按钮区域 */}
-      <div style={{ position: 'absolute', zIndex: 10000 }}>
-        {/* 获取合成信息按钮 */}
-        <GetCompInfoButton />
-      </div>
     </div>
   )
 }
