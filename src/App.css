@@ -360,7 +360,7 @@ button:focus-visible {
 }
 
 /* 顶部按钮栏 */
-.top-buttons {
+/* .top-buttons {
   display: flex;
   justify-content: flex-end;
   padding: 8px;
@@ -386,4 +386,4 @@ button:focus-visible {
 .test-button.active {
   background-color: #4d90fe;
   color: white;
-} 
+} */ 
