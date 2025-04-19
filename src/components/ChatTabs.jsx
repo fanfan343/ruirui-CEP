@@ -86,16 +86,84 @@ const parseSerializedData = (jsonString) => {
 };
 
 // Layer按钮组件，使用memo优化渲染
-const LayerButton = memo(({ layerLine, layerType, isDisabled, onClick }) => (
+const LayerButton = memo(({ layerLine, layerType, isDisabled, onClick }) => {
+  // 解析图层行内容
+  // 预期格式如: "1. 文本图层1 [文本图层]"
+  const numberMatch = layerLine.match(/^(\d+)\./);
+  const layerNumber = numberMatch ? numberMatch[1] : '';
+  
+  // 提取图层名称 (位于序号和类型之间)
+  let layerName = '';
+  if (layerLine.includes('[')) {
+    layerName = layerLine.substring(
+      numberMatch ? numberMatch[0].length : 0,
+      layerLine.lastIndexOf('[')
+    ).trim();
+  } else {
+    layerName = layerLine.substring(
+      numberMatch ? numberMatch[0].length : 0
+    ).trim();
+  }
+  
+  // 如果图层名包含禁用标记，则移除它
+  if (layerName.includes('(已禁用)')) {
+    layerName = layerName.replace('(已禁用)', '').trim();
+  }
+  
+  // 截断长图层名（限制为16个字节）
+  const truncateLayerName = (name) => {
+    // 计算字符串字节长度（中文字符算2个字节）
+    const getByteLength = (str) => {
+      let len = 0;
+      for (let i = 0; i < str.length; i++) {
+        // 中文字符编码范围：0x4e00-0x9fa5
+        if (str.charCodeAt(i) >= 0x4e00 && str.charCodeAt(i) <= 0x9fa5) {
+          len += 2; // 中文字符算2个字节
+        } else {
+          len += 1; // 其他字符算1个字节
+        }
+      }
+      return len;
+    };
+    
+    // 如果字节长度超过16，截断并添加...
+    if (getByteLength(name) > 16) {
+      let result = '';
+      let byteLen = 0;
+      
+      for (let i = 0; i < name.length; i++) {
+        const charCode = name.charCodeAt(i);
+        const charByteLen = (charCode >= 0x4e00 && charCode <= 0x9fa5) ? 2 : 1;
+        
+        // 如果添加当前字符会超出限制，则停止并添加...
+        if (byteLen + charByteLen > 13) { // 13字节 + "..."(3字节) = 16字节
+          return result + '...';
+        }
+        
+        result += name.charAt(i);
+        byteLen += charByteLen;
+      }
+    }
+    
+    return name;
+  };
+  
+  // 处理图层名
+  const displayLayerName = truncateLayerName(layerName);
+  
+  return (
   <button 
     className={`layer-button ${isDisabled ? 'disabled' : ''}`}
     data-layer-type={layerType}
     onClick={onClick}
     tabIndex="-1"
   >
-    {layerLine}
+      <span className="layer-number">{layerNumber}</span>
+      <span className="layer-name" title={layerName}>{displayLayerName}</span>
+      <span className="layer-type">{layerType}</span>
   </button>
-));
+  );
+});
 
 // 合成信息显示容器组件
 const CompInfoContainer = memo(({ compInfo, onRefresh, onClose, onLayerClick }) => {
@@ -119,14 +187,6 @@ const CompInfoContainer = memo(({ compInfo, onRefresh, onClose, onLayerClick }) 
         </span>
         <div className="header-actions">
           <button 
-            className="comp-info-refresh-btn"
-            onClick={onRefresh}
-            title="刷新图层列表"
-            tabIndex="-1"
-          >
-            ↻
-          </button>
-          <button 
             className="comp-info-close-btn"
             onClick={onClose}
             tabIndex="-1"
@@ -136,6 +196,14 @@ const CompInfoContainer = memo(({ compInfo, onRefresh, onClose, onLayerClick }) 
         </div>
       </div>
       <div className="comp-info-content">
+        {/* 添加表头 */}
+        <div className="layers-list-header">
+          <div className="layer-header-row">
+            <span className="layer-header-number">#</span>
+            <span className="layer-header-name">图层名</span>
+            <span className="layer-header-type">类型</span>
+          </div>
+        </div>
         {/* 直接显示图层列表按钮 */}
         <div className="layers-list-buttons">
           {layers.map((layerLine, index) => {
